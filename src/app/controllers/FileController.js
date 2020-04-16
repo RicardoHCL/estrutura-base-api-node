@@ -24,6 +24,19 @@ class FileController {
 
     return res.json(file);
   }
+
+  async delete(req, res) {
+    const user = await User.findByPk(req.userId);
+
+    // Caso o usuário de fato tenha uma imagem ele deleta
+    if (user.avatar_id) {
+      const avatar = await File.findByPk(user.avatar_id);
+
+      await avatar.destroy();
+    }
+
+    return res.status(204).json();
+  }
 }
 
 export default new FileController();
