@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import User from '../models/User';
+import File from '../models/File';
 import errorMessages from '../constants/ErrorMessages';
 
 class UserController {
@@ -47,6 +48,13 @@ class UserController {
   async listOne(req, res) {
     const user = await User.findByPk(req.userId, {
       attributes: ['id', 'name', 'email', 'phone'],
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'name', 'path', 'url'],
+        },
+      ],
     });
 
     return res.json(user);
