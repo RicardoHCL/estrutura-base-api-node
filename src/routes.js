@@ -17,5 +17,6 @@ routes.use(authMiddleware);
 
 // Rotas Bloqueadas
 routes.get('/profile', UserController.listOne);
+routes.put('/users', UserController.update);
 
 export default routes;
