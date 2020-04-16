@@ -1,8 +1,26 @@
+import * as Yup from 'yup';
 import User from '../models/User';
 import errorMessages from '../constants/ErrorMessages';
 
 class UserController {
   async create(req, res) {
+    // Validação dos campos com o Yup
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+      email: Yup.string().email().required(),
+      phone: Yup.string().required().min(8).max(11),
+      password: Yup.string().required().min(8),
+      confirmParssword: Yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([Yup.ref('password')]) : field
+      ),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res
+        .status(400)
+        .json({ error: errorMessages.yup_validation_failed });
+    }
+
     // Verificação de unicidade do email
     const user = await User.findOne({
       where: {
@@ -35,6 +53,28 @@ class UserController {
   }
 
   async update(req, res) {
+    // Validação dos campos com o Yup
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string().email(),
+      phone: Yup.string().min(8).max(11),
+      oldPassword: Yup.string().min(8),
+      password: Yup.string()
+        .min(8)
+        .when('oldPassword', (oldPassword, field) =>
+          oldPassword ? field.required() : field
+        ),
+      confirmPassword: Yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([Yup.ref('password')]) : field
+      ),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res
+        .status(400)
+        .json({ error: errorMessages.yup_validation_failed });
+    }
+
     const { email, phone, oldPassword } = req.body;
 
     const user = await User.findByPk(req.userId);
